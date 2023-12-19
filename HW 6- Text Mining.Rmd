@@ -3,9 +3,14 @@ title: "HW6: Text Mining"
 author: "Chenxi Zhu, Teresa Chang, and Tiffany Luo"
 date: "`r Sys.Date()`"
 output: prettydoc::html_pretty
+editor_options: 
+  markdown: 
+    wrap: 80
+  chunk_output_type: inline
 ---
 
-The aim of this Markdown is to demonstrate the use of various text analysis tools in R, including text clustering, word clouds and sentiment analysis.
+The aim of this Markdown is to demonstrate the use of various text analysis
+tools in R, including text clustering, word clouds and sentiment analysis.
 
 # 3.Results
 
@@ -13,7 +18,9 @@ The aim of this Markdown is to demonstrate the use of various text analysis tool
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Here, we have a list of 20 most popular books which we obtain from the Gutenberg project (https://www.gutenberg.org/ebooks/search/?sort_order=downloads). These books are sorted by popularity/number of downloads. 
+Here, we have a list of 20 most popular books which we obtain from the Gutenberg
+project (<https://www.gutenberg.org/ebooks/search/?sort_order=downloads>). These
+books are sorted by popularity/number of downloads.
 
 ```{r libraries, message=FALSE, warning=FALSE}
 library(wordcloud)
@@ -28,6 +35,7 @@ library(syuzhet)
 ```
 
 ## 3.1 Load and preprocess the text of the books from www.gutenberg.org.
+
 ```{r load-data}
 # Define the URLs of the text documents
 urls <- c(
@@ -54,9 +62,10 @@ urls <- c(
 )
 ```
 
-## 3.2 Data Preprocessing 
+## 3.2 Data Preprocessing
 
-The first thing we want to do is to convert the text in all of these URLS into a Corpus. 
+The first thing we want to do is to convert the text in all of these URLS into a
+Corpus.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 # Load and preprocess all text documents
@@ -66,13 +75,16 @@ myCorpus <- tm::VCorpus(VectorSource(sapply(urls, readLines)))
 myCorpus <- tm_map(myCorpus, content_transformer(tolower))
 ```
 
-We'll look at lines 830-900 of the first entry (document) in the corpus, which can exclude information about the ebook, and the Table of Contents.
+We'll look at lines 830-900 of the first entry (document) in the corpus, which
+can exclude information about the ebook, and the Table of Contents.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 cat(content(myCorpus[[1]])[830:900], sep = "\n")
 ```
 
-Now that we have the data in a corpus, we'll do some data cleaning, by converting a bunch of special characters (e.g., **@**, **/**, **]**, **$**) to a space and by removing apostrophes.
+Now that we have the data in a corpus, we'll do some data cleaning, by
+converting a bunch of special characters (e.g., \*\*@*\*, **/**, **]**, **\$**)
+to a space and by removing apostrophes.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 #     Defining the toSpace function
@@ -93,7 +105,6 @@ myCorpus <- tm_map(myCorpus, toSpace, "‘")
 myCorpus <- tm_map(myCorpus, remApostrophe, "’")
 ```
 
-
 We'll then remove numbers and punctuation.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
@@ -102,7 +113,9 @@ myCorpus <- tm_map(myCorpus, removePunctuation)
 cat(content(myCorpus[[1]])[830:900], sep = "\n")
 ```
 
-We look at a list of English stop words (e.g., _a_, _to_) that we can remove from the documents. Stop words are frequent terms that often don't provide a lot of useful information.
+We look at a list of English stop words (e.g., *a*, *to*) that we can remove
+from the documents. Stop words are frequent terms that often don't provide a lot
+of useful information.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 stopwords("english")
@@ -110,7 +123,8 @@ myCorpus <- tm_map(myCorpus, removeWords, stopwords("english"))
 cat(content(myCorpus[[1]])[830:900], sep = "\n")
 ```
 
-We can also remove additional (i.e., self-defined) stop words, such as _ebook_ that appear in the first few lines of the text.
+We can also remove additional (i.e., self-defined) stop words, such as *ebook*
+that appear in the first few lines of the text.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 myCorpus <- tm_map(myCorpus, removeWords,c("ebook", "author", "translators", 
@@ -118,7 +132,9 @@ myCorpus <- tm_map(myCorpus, removeWords,c("ebook", "author", "translators",
 cat(content(myCorpus[[1]])[830:900], sep = "\n")
 ```
 
-Lastly, We can play around with stemming. This removes common word suffixes and endings like _es_, _ed_, _ing_, etc. Alternatively, there is lemmatization, which groups together different inflected forms of the same word. 
+Lastly, We can play around with stemming. This removes common word suffixes and
+endings like *es*, *ed*, *ing*, etc. Alternatively, there is lemmatization,
+which groups together different inflected forms of the same word.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE, eval=FALSE}
 myCorpus <- tm_map(myCorpus, stemDocument)
@@ -127,14 +143,19 @@ cat(content(myCorpus[[1]])[830:900], sep = "\n")
 
 ## 3.3 Term Document Matrix
 
-The next step is to create a term document matrix (TDM). A TDM is a representation of how frequently different terms (shown in rows) appear in each of the documents (shown in columns). The transpose of the TDM is the document term matrix (DTM), where the rows and columns are switched.
+The next step is to create a term document matrix (TDM). A TDM is a
+representation of how frequently different terms (shown in rows) appear in each
+of the documents (shown in columns). The transpose of the TDM is the document
+term matrix (DTM), where the rows and columns are switched.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 tdm <- TermDocumentMatrix(myCorpus)
 tm::inspect(tdm)
 ```
 
-We convert the TDM to a matrix that we call `m`. Each of the rows in `m` corresponds to each of the unique terms (words) that appears in the documents, and each of the columns corresponds to each document. 
+We convert the TDM to a matrix that we call `m`. Each of the rows in `m`
+corresponds to each of the unique terms (words) that appears in the documents,
+and each of the columns corresponds to each document.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 m<- as.matrix(tdm)
@@ -145,7 +166,8 @@ colnames(m) <- c("Frankenstein", "Moby Dick", "A Christmas Carol in Prose", "Pri
 head(m)
 ```
 
-We filter our data to include only those words that are actually in the Scrabble Dictionary.
+We filter our data to include only those words that are actually in the Scrabble
+Dictionary.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 dictionary <- as.character(words::words$word)
@@ -166,7 +188,8 @@ for (i in seq(1, num_observations, chunk_size)) {
 }
 ```
 
-We look at the terms that were dropped in myCorpus -- these are all the words that aren't in the Scrabble Dictionary
+We look at the terms that were dropped in myCorpus -- these are all the words
+that aren't in the Scrabble Dictionary
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 cat(content(myCorpus[[1]])[980:1000], sep = "\n")
@@ -174,7 +197,9 @@ cat(content(myCorpus[[1]])[980:1000], sep = "\n")
 
 ## 3.4 Document Term Matrix
 
-Now that `myCorpus` has had all the words that aren't in the dictionary removed, we convert it to a document term matrix (DTM). This is the format that we actually want - where the documents are rows, and terms are columns.
+Now that `myCorpus` has had all the words that aren't in the dictionary removed,
+we convert it to a document term matrix (DTM). This is the format that we
+actually want - where the documents are rows, and terms are columns.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 dtm_cleaned <- DocumentTermMatrix(myCorpus)
@@ -182,6 +207,7 @@ tm::inspect(dtm_cleaned)
 ```
 
 As earlier, we convert the DTM to a matrix.
+
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 m <- as.matrix(dtm_cleaned)
 dim(m)
@@ -190,7 +216,11 @@ rownames(m) <- c("Frankenstein", "Moby Dick", "A Christmas Carol in Prose", "Pri
 "The Complete Works of William Shakespeare", "Little Women", "The Enchanted April", "The Blue Castle", "Cranford", "The Adventures of Ferdinand Count Fathom", "The Expedition of Humphry Clinker", "The Adventures of Roderick Random", "History of Tom Jones, a Foundling", "My Life — Volume 1", "Twenty years after", "The Eyes Have It", "Alice's Adventures in Wonderland")
 ```
 
-We look at the term distribution. The histogram and tabulation can show us the distribution of term frequency across all terms. We can see that there are a lot of terms that appear only a few times, while some others appear thousands of times. The word cloud shows us the terms that appear the most, such that higher frequency is indicated by a larger font.
+We look at the term distribution. The histogram and tabulation can show us the
+distribution of term frequency across all terms. We can see that there are a lot
+of terms that appear only a few times, while some others appear thousands of
+times. The word cloud shows us the terms that appear the most, such that higher
+frequency is indicated by a larger font.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 cs <- as.matrix(colSums(m))             #How many times each term appears across all documents (texts)
@@ -201,16 +231,21 @@ tab <- as.matrix(table(cs))
 wordcloud(myCorpus, min.freq=1000)
 ```
 
-In the word cloud, we can see that words such as "thou", "well", "time", "lord" are some of the most often used words in Frankenstein. Since the novel is a Gothic work of fiction in Romantic era, it makes sense that its language reflects the literary conventions of that time. For example, "Thou" is an archaic second-person singular pronoun, which contributes to the somewhat archaic atmosphere of the novel. The use of the word "lord" could be tied to the novel's Gothic and Romantic elements. It might be used to represent a sense of awe, reverence, or to emphasize the power dynamics in the novel.
-
-
-
-
+In the word cloud, we can see that words such as "thou", "well", "time", "lord"
+are some of the most often used words in Frankenstein. Since the novel is a
+Gothic work of fiction in Romantic era, it makes sense that its language
+reflects the literary conventions of that time. For example, "Thou" is an
+archaic second-person singular pronoun, which contributes to the somewhat
+archaic atmosphere of the novel. The use of the word "lord" could be tied to the
+novel's Gothic and Romantic elements. It might be used to represent a sense of
+awe, reverence, or to emphasize the power dynamics in the novel.
 
 ## 3.5 Text Clustering
 
-
-In our preparation for cluster analysis, we remove all variables where the column sum is less than 10,000 (i.e., if the term appears less than 10,000 times in all documents). We are only doing it here so that we have a reasonable number of variables to include in the cluster analysis for the sake of this example.
+In our preparation for cluster analysis, we remove all variables where the
+column sum is less than 10,000 (i.e., if the term appears less than 10,000 times
+in all documents). We are only doing it here so that we have a reasonable number
+of variables to include in the cluster analysis for the sake of this example.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 variables_to_remove <- cs < 10000
@@ -229,8 +264,9 @@ m_fin <- m_subset/rowSums(m)
 m_scale <- scale(m_fin)
 ```
 
-
-Before performing the k-means analysis on the scaled (normalized) relative frequencies of words, we need to identify the optimal number of clusters based on the result of NbClust approach.
+Before performing the k-means analysis on the scaled (normalized) relative
+frequencies of words, we need to identify the optimal number of clusters based
+on the result of NbClust approach.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 
@@ -245,6 +281,7 @@ barplot(table(nc$Best.n[1,]),
 ```
 
 We will use 3 clusters based on the NbClust approach.
+
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 k_means_results <- kmeans(m_scale, 3, 30)
 ```
@@ -254,7 +291,9 @@ k_means_results$cluster
 k_means_results$size
 ```
 
-Finally, we look at the number of times each of the terms appears in each cluster. Ultimately, we see that certain terms have different frequencies in the clusters.
+Finally, we look at the number of times each of the terms appears in each
+cluster. Ultimately, we see that certain terms have different frequencies in the
+clusters.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 word_totals_by_cluster <- round(aggregate(m_subset, by=list(cluster=k_means_results$cluster), sum),1)
@@ -278,16 +317,24 @@ title(ylab = "Sum")
 title(main = "Bar Plot of Sums by Group")
 ```
 
-
 ## 3.6 Sentiment Analysis
 
-A sentiment lexicon, also known as a sentiment dictionary, is a collection of words or phrases annotated with sentiment polarity information. It associates each word or phrase with a sentiment score indicating its positive, negative, or neutral sentiment. Sentiment lexicons are commonly used in sentiment analysis tasks to determine the sentiment or emotional tone expressed in text. 
+A sentiment lexicon, also known as a sentiment dictionary, is a collection of
+words or phrases annotated with sentiment polarity information. It associates
+each word or phrase with a sentiment score indicating its positive, negative, or
+neutral sentiment. Sentiment lexicons are commonly used in sentiment analysis
+tasks to determine the sentiment or emotional tone expressed in text.
 
-We use sentiment analysis to examine the sentiment in an entire body of text for the 20 most popular books. This is often done by aggregating sentiment scores of all the words in the text. One issue is that for longer texts, the positive and negative terms often tend to wash each other out. Therefore, shorter texts of a few sentences or paragraphs work well.
+We use sentiment analysis to examine the sentiment in an entire body of text for
+the 20 most popular books. This is often done by aggregating sentiment scores of
+all the words in the text. One issue is that for longer texts, the positive and
+negative terms often tend to wash each other out. Therefore, shorter texts of a
+few sentences or paragraphs work well.
 
-Here, we will use nrc as our sentiment lexicon.We take the first book in our data, Frankenstein, which is the first row of the matrix `m`. The `get_nrc_sentiment` command obtains the sentiment score for each word in Frankenstein that wasn't removed in the cleaning process above.
-
-
+Here, we will use nrc as our sentiment lexicon.We take the first book in our
+data, Frankenstein, which is the first row of the matrix `m`. The
+`get_nrc_sentiment` command obtains the sentiment score for each word in
+Frankenstein that wasn't removed in the cleaning process above.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 nrc <- syuzhet::get_sentiment_dictionary(dictionary="nrc")
@@ -305,17 +352,14 @@ bing <- syuzhet::get_sentiment_dictionary(dictionary="bing")
 head(bing, n=20L)
 ```
 
-
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 syuzhet <- syuzhet::get_sentiment_dictionary(dictionary="syuzhet")
 head(syuzhet, n=20L)
 ```
 
-
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 get_nrc_sentiment("gorgeous")
 ```
-
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 Frankenstein <- as.data.frame(m[1,])
@@ -339,8 +383,6 @@ We multiply the sentiment by the frequency of the term.
 head(Frankenstein)
 ```
 
-
-
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 # Select the columns to be multiplied (last ten columns)
 cols_to_multiply <- names(Frankenstein_Sentiment)[3:12]
@@ -350,16 +392,23 @@ cols_to_multiply <- names(Frankenstein_Sentiment)[3:12]
 Frankenstein_Sentiment[, cols_to_multiply] <- Frankenstein_Sentiment[, cols_to_multiply] * Frankenstein_Sentiment$Term_Frequency
 ```
 
-We'll see the total prevalence of each sentiment in the text by summing each column and creating a bar plot
+We'll see the total prevalence of each sentiment in the text by summing each
+column and creating a bar plot
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 Frankenstein_Sentiment_Total <- t(as.matrix(colSums(Frankenstein_Sentiment[,-1:-2])))
 barplot(Frankenstein_Sentiment_Total, las=2, ylab='Count', main='Sentiment Scores')
 ```
 
-From the plot above, we can see that the number of words with positive sentiments are more than the number of words with negative sentiments. Note that We're using Frankenstein as an example for the sentiment analysis, and this process can be done for each of the books to find out their word sentiment distribution.
+From the plot above, we can see that the number of words with positive
+sentiments are more than the number of words with negative sentiments. Note that
+We're using Frankenstein as an example for the sentiment analysis, and this
+process can be done for each of the books to find out their word sentiment
+distribution.
 
-We can also try other lexicons in addition to nrc. Specifically, we will use the `get_sentiment` command to get the scores for each of the terms using each dictionary.
+We can also try other lexicons in addition to nrc. Specifically, we will use the
+`get_sentiment` command to get the scores for each of the terms using each
+dictionary.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 Frankenstein$Syuzhet <- as.matrix(get_sentiment(Frankenstein$Term, method="syuzhet"))
@@ -373,7 +422,9 @@ hist(Frankenstein$NRC)
 
 ```
 
-We can compare the results from the different lexicons by assigning a value of -1 to all terms that have a negative sentiment, 0 to all terms that have a neutral sentiment, and 1 to all terms that have a positive sentiment.
+We can compare the results from the different lexicons by assigning a value of
+-1 to all terms that have a negative sentiment, 0 to all terms that have a
+neutral sentiment, and 1 to all terms that have a positive sentiment.
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 sentiment_columns <- Frankenstein[ , 3:6]
@@ -381,7 +432,9 @@ sentiment_columns <- data.frame(lapply(sentiment_columns, sign))
 sentiment_columns <- data.frame(lapply(sentiment_columns, as.factor))
 ```
 
-We have the prevalence of _unique_ negative, neutral terms (here, we are talking about _unique_ terms because we are not weighing them by how often they appear in the document).
+We have the prevalence of *unique* negative, neutral terms (here, we are talking
+about *unique* terms because we are not weighing them by how often they appear
+in the document).
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
 #Raw frequencies
@@ -390,15 +443,28 @@ sapply(sentiment_columns, function(x) if("factor" %in% class(x)) {table(x)})
 sapply(sentiment_columns, function(x) if("factor" %in% class(x)) {prop.table(table(x))})
 ```
 
-We can see that in general, most of the terms are neutral, with about 3-8% of terms being positive and 4-13% of the terms being negative, depending on which lexicon we use. 
+We can see that in general, most of the terms are neutral, with about 3-8% of
+terms being positive and 4-13% of the terms being negative, depending on which
+lexicon we use.
 
 # 4. Discussion
 
-In the word Cloud, the presence of words like "thou," "well," "time," and "lord" suggests that the language used in that piece of "Frankenstein" is likely reflective of the time period and literary style in which it was written. Comparing word clouds from different novels or different chapters can highlight changes in language use, and potentially emphasizing critical events in the narrative.
+In the word Cloud, the presence of words like "thou," "well," "time," and "lord"
+suggests that the language used in that piece of "Frankenstein" is likely
+reflective of the time period and literary style in which it was written.
+Comparing word clouds from different novels or different chapters can highlight
+changes in language use, and potentially emphasizing critical events in the
+narrative.
 
-Going beyond word frequency, investigating the sentiment distribution across different chapters or different novels may help to identify the tone of the narratives. There might be specific chapters or novels associated with more positive or negative sentiments. This could provide a understanding of the novel's themes and plot development.
+Going beyond word frequency, investigating the sentiment distribution across
+different chapters or different novels may help to identify the tone of the
+narratives. There might be specific chapters or novels associated with more
+positive or negative sentiments. This could provide a understanding of the
+novel's themes and plot development.
 
-For future analysis, we can use Frankenstein as an example work of Gothic literature, and explore similar Gothic literature to find whether there are specific words associated with the Gothic genre in general. This can help to identify the key words in the genre, and link with the cultural and historical context. In addition, we can apply this method to more genres and find their genre key words.
-
-
-
+For future analysis, we can use Frankenstein as an example work of Gothic
+literature, and explore similar Gothic literature to find whether there are
+specific words associated with the Gothic genre in general. This can help to
+identify the key words in the genre, and link with the cultural and historical
+context. In addition, we can apply this method to more genres and find their
+genre key words.
