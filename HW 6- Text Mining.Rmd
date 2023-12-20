@@ -9,8 +9,70 @@ editor_options:
   chunk_output_type: inline
 ---
 
-The aim of this Markdown is to demonstrate the use of various text analysis
-tools in R, including text clustering, word clouds and sentiment analysis.
+# 1. Introduction
+
+In this project, we aim to explore the textual characteristics of the 20 most
+popular books obtained from the Gutenberg Project, focusing on Mary Shelley's
+timeless classic Frankenstein. By employing text mining techniques, we aim to
+delve into the intricate pattern of the narrative by using text analysis tools
+in R, such as data preprocessing, term document matrix creation, document term
+matrix analysis, text clustering, and sentiment analysis. Besides looking at
+word frequencies, we investigate the sentiment distribution across various
+chapters and novels, unveiling the emotional components and tones in the
+narratives. This analysis hopes to reveal the mystery of linguistic nuances and
+thematic terms in Frankenstein with the hope of understanding the Gothic
+masterpiece and its cultural and historical contexts better. It can be extended
+to other literary genres, providing a comprehensive understanding of
+genre-specific linguistic nuances and diverse cultural landscapes.
+
+# 2. Methods
+
+In this project, text-mining techniques are employed to analyze the book
+Frankenstein. The process begins with data preprocessing. The text from the
+provided URLs is converted into a corpus, and we clean the datasets by removing
+special characters, numbers, punctuation, and common English stop words so that
+the remaining can show the frequency of the word uses without being influenced
+by the words that don\'t provide helpful information. Additional self-defined
+stop words are also eliminated, and stemming or lemmatization is applied for
+further refinement. 
+
+-   Stemming is a normalization technique that removes suffixes to reduce words
+    to their root. For example, stemming would transform the words \'running\'
+    and \'runner\' to the word root of \'run.\'
+
+-   Lemmatization is also a normalization technique. Compared to stemming,
+    lemmatization considers the context of the word in the sentence and produces
+    a meaningful base form, such as transforming \'better\' to \'good.\'
+
+After that, the term document matrix (TDM) is created, and non-Scrabble
+Dictionary words are filtered out, which helps focus analyses on meaningful and
+widely recognized terms. TDM is a mathematical representation of a corpus. The
+rows represent unique terms, and the columns represent documents. Each cell in
+the matrix contains the frequency of a particular term in a specific document,
+making it a structured way to analyze the occurrence of words in a text
+collection.
+
+Subsequently, a document term matrix (DTM) is generated, similar to a TDM but
+with rows and columns switched. The distribution of terms is visualized using
+histograms and word clouds, which help visually represent the frequency of words
+in a text. The more frequently occurring words are displayed in larger fonts.
+
+Furthermore, data preparation involves filtering out low-frequency terms, and
+k-means analysis is performed to cluster terms based on their relative
+frequencies. This analysis iteratively assigns data points to clusters and
+adjusts the cluster centroids until the clusters are optimized, allowing the
+identification of patterns or groups within a dataset. The optimal number of
+clusters is determined using the NbClust approach, which considers various
+clustering indices, including the Hubert index and the D index, to assess the
+quality and stability of clusters for different values of k, helping to choose
+the most suitable number of clusters for a given dataset.
+
+Lastly, sentiment analysis is the process of categorizing the emotional tone
+expressed in a piece of text, often as positive, negative, or neutral. This
+analysis is performed using sentiment lexicons, lists that associate words with
+specific information that assign sentiment scores to words. Therefore, multiple
+lexicons, including Syuzhet, Bing, AFINN, and NRC, are compared at the end, and
+sentiment scores are visualized.
 
 # 3.Results
 
@@ -468,3 +530,11 @@ specific words associated with the Gothic genre in general. This can help to
 identify the key words in the genre, and link with the cultural and historical
 context. In addition, we can apply this method to more genres and find their
 genre key words.
+
+# Reference
+
+-   Ali, A., & Saad, S. (2016). Term extraction and hierarchy induction method
+    based on islamic dictionary. <https://doi.org/10.1109/infrkm.2016.7806345>
+
+-   Text Mining in Data and Information: Unveiling Insights through Data Mining
+    -- Gosic. <https://gosic.org/text-mining/>
