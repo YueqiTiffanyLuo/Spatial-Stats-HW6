@@ -30,11 +30,13 @@ genre-specific linguistic nuances and diverse cultural landscapes.
 In this project, text-mining techniques are employed to analyze the book
 Frankenstein. The process begins with data preprocessing. The text from the
 provided URLs is converted into a corpus, and we clean the datasets by removing
-special characters, numbers, punctuation, and common English stop words so that
-the remaining can show the frequency of the word uses without being influenced
-by the words that don't provide helpful information. Additional self-defined
-stop words are also eliminated, and stemming or lemmatization is applied for
-further refinement. 
+special characters, numbers, punctuation. We also want to remove common English
+stop words, which are a set of commonly used words but carry little useful
+information such as \"a,\" \"the,\" \"is,\" \"are\". As a result, the remaining
+text can show the frequency of the word uses without being influenced by the
+words that don't provide helpful content. Additional self-defined stop words are
+also eliminated, and stemming or lemmatization is applied for further
+refinement. 
 
 -   Stemming is a normalization technique that removes suffixes to reduce words
     to their root. For example, stemming would transform the words 'running' and
@@ -272,7 +274,7 @@ We look at the terms that were dropped in myCorpus -- these are all the words
 that aren't in the Scrabble Dictionary
 
 ```{r warning=FALSE, message=FALSE, cache=FALSE}
-cat(content(myCorpus[[1]])[980:1000], sep = "\n")
+cat(content(myCorpus[[1]])[830:900], sep = "\n")
 ```
 
 ## 3.4 Document Term Matrix
